@@ -71,9 +71,9 @@ function UpdatedBlogs() {
 
 
             if (resp.data.success ) {
-                console.log("Blogdata" , resp.data);
-                
+                console.log("Blogdata" , resp.data); 
                 toast.success(resp.data.message)
+                navigate('/dashboard/yourblog')
             }
 
         } catch (error) {
