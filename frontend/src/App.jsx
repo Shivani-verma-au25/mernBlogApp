@@ -17,6 +17,7 @@ import Comments from './pages/Comments';
 import CreateBlog from './pages/CreateBlog';
 import { toast } from 'sonner';
 import UpdatedBlogs from './pages/UpdatedBlogs';
+import BlogDetail from './pages/BlogDetail';
 
 function App() {
   const dispatch = useDispatch()
@@ -55,6 +56,7 @@ function App() {
           <Route path='comments' element={<Comments />} />
           <Route path='createblog' element={<CreateBlog />} />
           <Route path='createblog/:blogId' element={<UpdatedBlogs/>} />
+          <Route path='blogDetailPage/:blogId' element={<BlogDetail/>} />
         </Route>
       </Routes>
       <Toaster />

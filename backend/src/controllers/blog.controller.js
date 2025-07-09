@@ -109,3 +109,114 @@ export const updateBlog = asyncHandler( async( req, res) => {
         
     }
 })
+
+
+// get all blogs 
+
+// export const getAllBlogs = asyncHandler( async (req , res) => {
+//     try {
+//         const blogs = await Blog.find().populate('author','name email pictureUrl').sort({createdAt : -1});
+//         if (!blogs || blogs.length === 0){
+//             return res.status(404).json({
+//                 success : false,
+//                 message : "No blogs found!"
+//             })
+//         }
+//         return res.status(200).json({
+//             success : true,
+//             message : 'Blogs fetched successfully!',
+//             blogs
+//         })
+
+
+//     } catch (error) {
+//         console.log("Error in get all blogs",error);
+        
+//         return res.status(500).json({
+//             success: false,
+//             message: "Failed to get Blogs!"
+//         })
+//     }
+// })
+
+
+// get all your own logs
+export const getOwnBlogs = asyncHandler( async (req ,res) =>{
+    try {
+        const userId = req.user._id; // get user id from token
+        if(!userId) {
+            return res.status(400).json({
+                success :false ,
+                message : "User not found!"
+            })
+        }
+        // find blogs by author id
+        const blogs = await Blog.find({author: userId}).populate('author','firstname lastname  photoUrl').sort({createdAt : -1});
+        if(!blogs || blogs.length === 0 ){
+            return res.status(404).json({
+                success : false,
+                message : "No blogs found!",
+                blogs : []
+            })
+        }
+        return res.status(200).json({
+            success : true,
+            message : "your blogs fetched successfully!",
+            blogs
+        })
+
+        
+    } catch (error) {
+        console.log("Error in get own blogs",error);
+        return res.status(500).json({
+            success : false,
+            message : "Failed to get your blogs!"
+        })
+        
+    }
+})
+
+
+// detele blog your won blog
+export const deleteOwnBlog = asyncHandler(async (req,res) =>{
+    try {
+        const {id} = req.params; // get blog id
+        if(!id){
+            return res.status(400).json({
+                success : false,
+                message : "Blog id is Required!"
+            })
+        }     
+        // find blog by id
+        const blog = await Blog.findById(id);
+        if(!blog){
+            return res.status(404).json({
+                success : false,
+                message : "Blog not found!"
+            })
+        }   
+        // check if the blog belongs to the user
+        if(blog.author.toString() !== req.user._id.toString()){
+            return res.status(403).json({
+                success : false,
+                message: "You are not authorized to delete this blog!"
+            })
+        }
+        // delete blog
+        const deletedBlog = await Blog.findByIdAndDelete(id);
+
+        return res.status(200).json({
+            success : true,
+            message : `${deletedBlog.title} deleted!`,
+            deletedBlog
+        })
+
+    } catch (error) {
+        console.log("Error in dalete own blog",error);
+        return res.status(500).json({
+            success:false,
+            message : 'Failed to delete blog!'
+        })
+        
+    }
+})
