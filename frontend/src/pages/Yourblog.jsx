@@ -101,7 +101,7 @@ function Yourblog() {
                     blog?.thumbnail? (
                       <>
                         <img src={blog.thumbnail} className='w-20 h-10 object-cover rounded-md hidden md:block' alt="" />
-                        <h2 onClick={()=>navigate(`/dashboard/blogDetailPage/${blog._id}`)} className='hover:underline cursor-pointer'>{blog?.title}</h2>
+                        <h2 onClick={()=>navigate(`/blogDetailPage/${blog._id}`)} className='hover:underline cursor-pointer'>{blog?.title}</h2>
                       </>
                     ):
                     <h1 className='text-xl font-bold'>There is no Picture! </h1>

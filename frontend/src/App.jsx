@@ -18,6 +18,7 @@ import CreateBlog from './pages/CreateBlog';
 import { toast } from 'sonner';
 import UpdatedBlogs from './pages/UpdatedBlogs';
 import BlogDetail from './pages/BlogDetail';
+import PageNotAvaibale from './pages/PageNotAvaibale';
 
 function App() {
   const dispatch = useDispatch()
@@ -48,6 +49,7 @@ function App() {
         <Route path='/about' element={<About />} />
         <Route path='/login' element={<Login /> } />
         <Route path='/signup' element={<Signup /> } />
+        <Route path='blogDetailPage/:blogId' element={<BlogDetail/>} />
         
         // nested routes 
         <Route path='/dashboard' element={<Dashboard />}>
@@ -56,8 +58,8 @@ function App() {
           <Route path='comments' element={<Comments />} />
           <Route path='createblog' element={<CreateBlog />} />
           <Route path='createblog/:blogId' element={<UpdatedBlogs/>} />
-          <Route path='blogDetailPage/:blogId' element={<BlogDetail/>} />
         </Route>
+        <Route path='*' element={ <PageNotAvaibale/> }/>
       </Routes>
       <Toaster />
     </div>
