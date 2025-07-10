@@ -220,3 +220,173 @@ export const deleteOwnBlog = asyncHandler(async (req,res) =>{
         
     }
 })
+
+
+// get published blogs 
+
+export const getPublishedBlogs = asyncHandler (async (req,res) => {
+    try {
+        const blogs = await Blog.find({isPublished : true}).populate('author','firstname lastname photoUrl').sort({createdAt : -1});
+        if(!blogs || blogs.length === 0){
+            return res.status(404).json({
+                success : false,
+                message : "No publishe blog found!",
+                blogs : []
+            })
+        }
+
+        return res.status(200).json({
+            success : true,
+            message : "Published blogs fetched successfully!",
+            blogs
+        })
+        
+    } catch (error) {
+        console.log("error in get published blog" ,error);
+        return res.status(500).json({
+            success: false,
+            message : "Failed to get Published Blog!"
+        })
+        
+    }
+})
+
+
+// toggle publish blog
+export const togglePublishBlog = asyncHandler(async(req,res) =>{
+    try {
+        const {blogId} = req.params;
+        const {isPublished} = req.query; // get isPublished from query params
+        if(!blogId){
+            return res.status(400).json({
+                success : false,
+                message : "Blog id is required!"
+            })
+        }
+        // if(isPublished !== 'true' && isPublished !== 'false'){
+        //     return res.status(400).json({
+        //         success :false,
+        //         message : "isPublished must be true or false!"
+        //     })
+        // }
+        // find blog by id
+        const blog = await Blog.findById(blogId);
+        if(!blog){
+            return res.status(404).json({
+                success : false,
+                message : "Blog not found!"
+            })
+        }
+        // check if the blog belongs to the user
+        // if(blog.author.toString() !== req.user._id.toString()){
+        //     return res.status(403).json({
+        //         success :false,
+        //         message :"You are not authorized to update this blog!"
+        //     })
+        // }
+        // toggle publish status
+        blog.isPublished = !blog.isPublished; 
+        const updatedBlog = await blog.save(); // save the updated blog
+        return res.status(200).json({
+            success : true,
+            message : `Blog ${isPublished ? 'published' : 'unpublished'} `,
+            updatedBlog
+        })
+
+        
+    } catch (error) {
+        console.log("error in toggle published blog" ,error);
+        return res.status(500).json({
+            success : false,
+            message : "Failed to update status!"
+        })
+        
+    }
+})
+
+
+// like blog
+
+export const likeBlog = asyncHandler( async (req, res) => {
+    try {
+        const {blogId} =req.params; // get blog id from params
+        if(!blogId){
+            return res.status(400).json({
+                success :false,
+                message :"Blog id is required!"
+            })
+        }
+
+        // find blog by id
+        const blog = await Blog.findById(blogId).populate('likes');
+        if(!blog){
+            return res.status(404).json({
+                success : false,
+                message : "Blog not found!"
+            })
+        }
+        // check if the blog is already liked by the user
+        const isLiked = blog.likes.includes(req.user._id);
+
+
+        if(isLiked){
+            // if liked ,than remove the user from likes array
+            blog.likes = blog.likes.filter(userId => userId.toString() !== req.user._id.toString());
+            await blog.save();
+            return res.status(200).json({
+                success : true,
+                message : "Blog unliked ",
+                blog
+            })
+        }else{
+            // if not liked ,than add the user to likes array
+            blog.likes.push(req.user)._id;
+            await blog.save();
+            return res.status(200).json({
+                success : true,
+                message :"Blog liked",
+                blog
+            })
+        }
+
+    } catch (error) {
+        console.log("Error in like blog",error);
+        return res.status(500).json({
+            success :false,
+            message : "Failed to like blog!"
+        })
+        
+    }
+})
+
+// check total likes of blogs
+
+export const getTotatllikes = asyncHandler(async (req,res) =>{
+    try {
+        const {blogId} = req.params; // get blogs id
+        if(!blogId){
+            return res.status(400).json({
+                success:false,
+                message :"Blog id is required!"
+            })
+        }
+
+        // find blog b
+        const blog = await Blog.find({author : blogId}).select('likes');
+        const totalLikes = blog.reduce((acc,blog)=> acc + (blog.likes?.length || 0) , 0);
+        return res.status(200).json({
+            success : true,
+            message :blog.length,
+            totalLikes
+        }) 
+
+        
+    } catch (error) {
+        console.log("Error in get total likes",error);
+        return res.status(500).json({
+            success :false,
+            message :"Failed to get toatal likes!"
+        })
+        
+    }
+})

@@ -17,8 +17,8 @@ function UpdatedBlogs() {
     const {blogId} = useParams()
     const {blogs,loading} = useSelector(state => state.blog)
     console.log("blog from satae" , blogs);
-    
     const selectBlogs = blogs.find(blog => blog._id === blogId)
+    
     const editor = useRef(null)
     const navigate = useNavigate()
     const dispatch = useDispatch()
@@ -26,8 +26,6 @@ function UpdatedBlogs() {
     const [content,setContent] = useState(selectBlogs?.description)
     
     const [previewThumbnail ,setPreviewThumbnail ] = useState(selectBlogs?.thumbnail)
-    
-
     const [blogData ,setBlogData] = useState({
         title: selectBlogs?.title,
         subtitle : selectBlogs?.subtitle,
@@ -36,10 +34,13 @@ function UpdatedBlogs() {
 
     })
 
+    const [isPublished ,setIsPublished] = useState(false)
+
     const selectChange =  (value)=>{
         setBlogData({...blogData , category : value})
     }
 
+    // thumbnail preview
     const prviewThumbnailfunc = (e) =>{
         const file = e.target.files?.[0]
         if (file) {
@@ -86,6 +87,46 @@ function UpdatedBlogs() {
     }
 
 
+    // toggle  publishe unpulished
+
+    const publisheAndUnpublished = async(action) => {
+        try {
+            const res = await axiosInsatnce.patch(`/blog/${selectBlogs._id}` ,{
+                params : {
+                    action
+                }
+            })
+
+            if (res.data.success) {
+                setIsPublished(!isPublished)
+                toast.success(res.data.message)
+                navigate('/dashboard/yourblog')
+            }else{
+                toast.error("Failed to update")
+            }
+        } catch (error) {
+            console.log("eeror in published unpubished" , error);
+            
+        }
+    }
+
+    // delete blog todo : have to check 
+    //  const deleteBlog = async (blogId) =>{
+    //     try {
+    //       const res = await axiosInsatnce.delete(`/blog/deleteOwnBlog/${blogId}`)
+    //       if (res.data.success) {
+    //         let filteredBlogs = blogs.filter(blog => blog._id !== blogId)
+    //         dispatch(setBlog(filteredBlogs))
+    //         toast.success(res.data.message)
+    //         navigate('/dashboard/yourblog')
+    //       }
+    //     } catch (error) {
+    //       console.log("error in delete ing blog",error);
+    //       toast.error(error.response.data.message || "Something went wrong while deleting")
+          
+    //     }
+    //   }
+
 
   return (
     <div className='md:ml-[320px] mt-20 px-3 pb-10'>
@@ -94,8 +135,12 @@ function UpdatedBlogs() {
                 <h1 className='text-4xl font-bold'>Baisc Blog information</h1>
                 <p>Make changes to your blogs here. Click here publish when you are done.</p>
                 <div className='space-x-2'>
-                    <Button>Publish</Button>
-                    <Button variant='destructive'>Remove Blog</Button>
+                    <Button 
+                    onClick={() => publisheAndUnpublished(selectBlogs.isPublished ? 'false' : ' true')}
+                    >{
+                        selectBlogs?.isPublished ? 'UnPublish' : "Publish"
+                    }</Button>
+                    <Button  variant='destructive'>Remove Blog</Button>
                 </div>
                 <div className='pt-10 '>
                     <Label className='py-2'>Title</Label>

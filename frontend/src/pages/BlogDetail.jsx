@@ -1,10 +1,9 @@
-import React from "react";
-import { useSelector } from "react-redux";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
 
 import {
   Breadcrumb,
-  BreadcrumbEllipsis,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
@@ -19,17 +18,28 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { BookMarked, Heart, MessageCircle, Share, Share2 } from "lucide-react";
+import { BookMarked, MessageCircle, Share2 } from "lucide-react";
 import { toast } from "sonner";
+import { axiosInsatnce } from "@/utils/axios";
+import { setBlog } from "@/store/blogSlice";
+import { FaHeart } from "react-icons/fa6";
+
 
 function BlogDetail() {
   const { blogId } = useParams();
   const { blogs } = useSelector((state) => state.blog);
-  console.log(blogs, "from details");
-
+  const { user } = useSelector((state) => state.auth);
   const selectedBlog = blogs.find((blog) => blog._id === blogId);
+  const [blogLike ,setBlogLike] = useState(selectedBlog.likes.length)
+  const [liked ,setLiked] = useState(selectedBlog.likes.includes(user._id) || false)
+  const dispatch = useDispatch()
+  console.log("selected blog",selectedBlog);
+  console.log("user ",user);
+  
+  
 
-  console.log("selected blog", selectedBlog);
+
+  // share blog
   const handleShare = (blogid) => {
     const blogUrl = `${window.location.origin}/blogs/${blogid}`
     if (navigator.share) {
@@ -48,6 +58,38 @@ function BlogDetail() {
       })
     }
   }
+
+  //like or dislike handler 
+  const likeAndDislikeHanlder = async () => {
+  try {
+    const res = await axiosInsatnce.get(`/blog/${selectedBlog._id}/like`); // ✅ always call /like
+
+    if (res.data.success) {
+      const updatedLikes = liked ? blogLike - 1 : blogLike + 1;
+      setBlogLike(updatedLikes);
+      setLiked(!liked);
+
+      // Update blog in redux
+      const updatedBlogs = blogs.map((blog) =>
+        blog._id === selectedBlog._id
+          ? {
+              ...blog,
+              likes: liked
+                ? blog.likes.filter((id) => id !== user._id)
+                : [...blog.likes, user._id],
+            }
+          : blog
+      );
+
+      dispatch(setBlog(updatedBlogs));
+      toast.success(res.data.message);
+    }
+  } catch (error) {
+    console.log("Error in like and dislike", error);
+    toast.error(error.response?.data?.message || "Something went wrong");
+  }
+};
+
 
   return (
     <div className="pt-14">
@@ -104,7 +146,14 @@ function BlogDetail() {
         {/* comment and like share */}
         <div className="flex items-center justify-between border-y darkborder-gray-800 border-gray-300 py-4 mb-8">
           <div className="flex items-center space-x-4 ">
-            <Button variant='ghost' className='flex items-center gap-1'><Heart className="size-5 cursor-pointer hover:text-gray-600 text-white" />1</Button>
+            <Button onClick={likeAndDislikeHanlder} variant='ghost' className='flex items-center gap-1'>
+              {
+                liked ? <FaHeart className="size-5 cursor-pointer hover:text-gray-600 text-red-700" />
+              :
+              <FaHeart className="size-5 cursor-pointer hover:text-gray-600 text-white" />
+              } 
+              <span>{blogLike}</span>
+              </Button>
             <Button variant='ghost' ><MessageCircle className="sixe-5"/>
             <span>1 comment</span>
             </Button>
