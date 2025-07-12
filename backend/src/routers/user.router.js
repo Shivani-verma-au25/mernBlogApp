@@ -1,5 +1,5 @@
 import {Router} from "express"
-import { loginUser, logoutUser, registerUser, updateProfile } from "../controllers/user.controller.js";
+import { getAllUsers, loginUser, logoutUser, registerUser, updateProfile } from "../controllers/user.controller.js";
 import { protectedRoutes } from "../middlewares/auth.middleware.js";
 import {singleUpload} from '../middlewares/multer.middleware.js'
 
@@ -9,6 +9,7 @@ const router = Router()
 router.route('/register').post(registerUser)
 router.route('/login').post(loginUser)
 router.route('/logout').post(logoutUser)
+router.route('/allUsers').get( getAllUsers)
 
 
 // protected routes

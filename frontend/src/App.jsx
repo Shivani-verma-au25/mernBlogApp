@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import UpdatedBlogs from './pages/UpdatedBlogs';
 import BlogDetail from './pages/BlogDetail';
 import PageNotAvaibale from './pages/PageNotAvaibale';
+import Footer from './components/Footer';
 
 function App() {
   const dispatch = useDispatch()
@@ -62,6 +63,7 @@ function App() {
         <Route path='*' element={ <PageNotAvaibale/> }/>
       </Routes>
       <Toaster />
+       <Footer/>
     </div>
   );
 }

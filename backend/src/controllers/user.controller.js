@@ -201,3 +201,32 @@ export const updateProfile = asyncHandler(async (req, res) => {
   }
 });
 
+// get all users
+export const getAllUsers = asyncHandler(async (req,res) => {
+    try {
+        const users = await User.find().select('-password');
+        if(!users || users.length === 0){
+            return res.status(404).json({
+                success :false,
+                message :"No users founds"
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            message : "All users",
+            totalLength : users.length,
+            users
+        })
+        
+    } catch (error) {
+        console.log("Error while getting all users",error);
+        return res.satus(500).json({
+            success :false,
+            message  :"Failed to get all users"
+        })
+        
+    }
+})
+
+
